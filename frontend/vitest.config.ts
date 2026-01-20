@@ -8,7 +8,6 @@ export default defineConfig({
     setupFiles: [path.resolve(__dirname, 'tests/setup.ts')],
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      '@prisma/client': path.resolve(__dirname, 'tests/mocks/prismaClient')
     },
     coverage: {
       enabled: false
