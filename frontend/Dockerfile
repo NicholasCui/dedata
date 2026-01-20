@@ -20,9 +20,6 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
-# Generate Prisma Client (if prisma directory exists)
-RUN if [ -d "prisma" ]; then npx prisma generate; fi
-
 # Build the application
 RUN npm run build
 
@@ -41,10 +38,6 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-
-# Copy Prisma files if they exist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma 2>/dev/null || true
-COPY --from=builder /app/prisma ./prisma 2>/dev/null || true
 
 # Set correct permissions
 RUN chown -R nextjs:nodejs /app
