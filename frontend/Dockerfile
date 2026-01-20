@@ -20,9 +20,6 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
-# Copy environment file for build
-COPY .env.production .env.production
-
 # Generate Prisma Client (if prisma directory exists)
 RUN if [ -d "prisma" ]; then npx prisma generate; fi
 
