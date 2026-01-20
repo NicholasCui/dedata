@@ -1,0 +1,421 @@
+@import 'tailwindcss';
+@plugin './hero.ts';
+/* Note: You may need to change the path to fit your project structure */
+@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #00ff41;
+  --card: #111111;
+  --card-foreground: #00ff41;
+  --primary: #00ff41;
+  --primary-foreground: #000000;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #00ff41;
+  --muted: #1a1a1a;
+  --muted-foreground: #66ff66;
+  --accent: #002200;
+  --accent-foreground: #00ff41;
+  --border: #333333;
+  --input: #111111;
+  --ring: #00ff41;
+  --success: #00ff00;
+  --warning: #ffff00;
+  --error: #ff0040;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --background: #000000;
+    --foreground: #00ff41;
+    --card: #111111;
+    --card-foreground: #00ff41;
+    --primary: #00ff41;
+    --primary-foreground: #000000;
+    --secondary: #1a1a1a;
+    --secondary-foreground: #00ff41;
+    --muted: #1a1a1a;
+    --muted-foreground: #66ff66;
+    --accent: #002200;
+    --accent-foreground: #00ff41;
+    --border: #333333;
+    --input: #111111;
+    --ring: #00ff41;
+    --success: #00ff00;
+    --warning: #ffff00;
+    --error: #ff0040;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', Monaco,
+    'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
+  font-feature-settings: 'rlig' 1, 'calt' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+@layer components {
+  .matrix-bg {
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 98px,
+        rgba(0, 255, 65, 0.03) 100px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 98px,
+        rgba(0, 255, 65, 0.03) 100px
+      );
+  }
+
+  .terminal {
+    background: #000000;
+    border: 1px solid #00ff41;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.2),
+      inset 0 0 10px rgba(0, 255, 65, 0.05);
+  }
+
+  .glitch {
+    position: relative;
+    display: inline-block;
+  }
+
+  .glitch::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 2px;
+    width: 100%;
+    height: 100%;
+    text-shadow: -2px 0 #ff0040;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
+    overflow: hidden;
+  }
+
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: -2px;
+    width: 100%;
+    height: 100%;
+    text-shadow: -2px 0 #00ffff, 2px 2px #ff0040;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim2 1s infinite linear alternate-reverse;
+    overflow: hidden;
+  }
+
+  .neon-text {
+    color: #00ff41;
+    text-shadow: 0 0 3px #00ff41, 0 0 6px #00ff41, 0 0 9px #00ff41;
+  }
+
+  .cyber-border {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cyber-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #00ff41, #00ffff, #ff0040, #00ff41);
+    background-size: 400% 400%;
+    animation: cyber-gradient 3s ease infinite;
+    padding: 1px;
+    z-index: -1;
+  }
+  .cyber-border > * {
+    background: var(--background);
+    width: 100%;
+    height: 100%;
+  }
+
+  .scan-line {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scan-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(0, 255, 65, 0.2),
+      transparent
+    );
+    animation: scan 2s infinite;
+  }
+
+  .hologram {
+    background: linear-gradient(
+      45deg,
+      transparent 30%,
+      rgba(0, 255, 65, 0.1) 50%,
+      transparent 70%
+    );
+    background-size: 20px 20px;
+    animation: hologram-move 20s linear infinite;
+  }
+}
+
+@layer utilities {
+  .animate-glitch {
+    animation: glitch 0.3s infinite;
+  }
+
+  .animate-terminal-cursor {
+    animation: terminal-cursor 1s infinite;
+  }
+
+  .animate-matrix-rain {
+    animation: matrix-rain 20s linear infinite;
+  }
+
+  .animate-cyber-pulse {
+    animation: cyber-pulse 2s ease-in-out infinite alternate;
+  }
+
+  .animate-scan-line {
+    animation: scan-line 3s linear infinite;
+  }
+}
+
+@keyframes glitch {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+}
+
+@keyframes glitch-anim {
+  0% {
+    clip: rect(64px, 9999px, 66px, 0);
+  }
+  5% {
+    clip: rect(30px, 9999px, 36px, 0);
+  }
+  10% {
+    clip: rect(90px, 9999px, 110px, 0);
+  }
+  15% {
+    clip: rect(10px, 9999px, 15px, 0);
+  }
+  20% {
+    clip: rect(40px, 9999px, 80px, 0);
+  }
+  25% {
+    clip: rect(65px, 9999px, 70px, 0);
+  }
+  30% {
+    clip: rect(20px, 9999px, 30px, 0);
+  }
+  35% {
+    clip: rect(80px, 9999px, 120px, 0);
+  }
+  40% {
+    clip: rect(50px, 9999px, 55px, 0);
+  }
+  45% {
+    clip: rect(70px, 9999px, 90px, 0);
+  }
+  50% {
+    clip: rect(25px, 9999px, 35px, 0);
+  }
+  55% {
+    clip: rect(95px, 9999px, 105px, 0);
+  }
+  60% {
+    clip: rect(15px, 9999px, 25px, 0);
+  }
+  65% {
+    clip: rect(85px, 9999px, 100px, 0);
+  }
+  70% {
+    clip: rect(45px, 9999px, 60px, 0);
+  }
+  75% {
+    clip: rect(35px, 9999px, 45px, 0);
+  }
+  80% {
+    clip: rect(75px, 9999px, 85px, 0);
+  }
+  85% {
+    clip: rect(55px, 9999px, 65px, 0);
+  }
+  90% {
+    clip: rect(5px, 9999px, 15px, 0);
+  }
+  95% {
+    clip: rect(60px, 9999px, 75px, 0);
+  }
+  100% {
+    clip: rect(35px, 9999px, 45px, 0);
+  }
+}
+
+@keyframes glitch-anim2 {
+  0% {
+    clip: rect(65px, 9999px, 100px, 0);
+  }
+  5% {
+    clip: rect(25px, 9999px, 30px, 0);
+  }
+  10% {
+    clip: rect(85px, 9999px, 90px, 0);
+  }
+  15% {
+    clip: rect(15px, 9999px, 20px, 0);
+  }
+  20% {
+    clip: rect(45px, 9999px, 50px, 0);
+  }
+  25% {
+    clip: rect(70px, 9999px, 75px, 0);
+  }
+  30% {
+    clip: rect(35px, 9999px, 40px, 0);
+  }
+  35% {
+    clip: rect(95px, 9999px, 100px, 0);
+  }
+  40% {
+    clip: rect(55px, 9999px, 60px, 0);
+  }
+  45% {
+    clip: rect(80px, 9999px, 85px, 0);
+  }
+  50% {
+    clip: rect(30px, 9999px, 35px, 0);
+  }
+  55% {
+    clip: rect(90px, 9999px, 95px, 0);
+  }
+  60% {
+    clip: rect(20px, 9999px, 25px, 0);
+  }
+  65% {
+    clip: rect(75px, 9999px, 80px, 0);
+  }
+  70% {
+    clip: rect(40px, 9999px, 45px, 0);
+  }
+  75% {
+    clip: rect(60px, 9999px, 65px, 0);
+  }
+  80% {
+    clip: rect(10px, 9999px, 15px, 0);
+  }
+  85% {
+    clip: rect(50px, 9999px, 55px, 0);
+  }
+  90% {
+    clip: rect(65px, 9999px, 70px, 0);
+  }
+  95% {
+    clip: rect(5px, 9999px, 10px, 0);
+  }
+  100% {
+    clip: rect(85px, 9999px, 90px, 0);
+  }
+}
+
+@keyframes terminal-cursor {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cyber-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes cyber-pulse {
+  0% {
+    box-shadow: 0 0 3px #00ff41, 0 0 6px #00ff41;
+  }
+  100% {
+    box-shadow: 0 0 6px #00ff41, 0 0 12px #00ff41;
+  }
+}
+
+@keyframes scan {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes scan-line {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100vw);
+  }
+}
+
+@keyframes matrix-rain {
+  0% {
+    transform: translateY(-100vh);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+@keyframes hologram-move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px;
+  }
+}
+
+/* Terminal font loading */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');

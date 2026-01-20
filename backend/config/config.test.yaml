@@ -1,0 +1,30 @@
+server:
+  host: 127.0.0.1
+  port: 8888
+  env: test
+
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: ""
+  dbname: dedata_test
+  sslmode: disable
+  max_idle_conns: 5
+  max_open_conns: 50
+  conn_max_lifetime: 1800
+
+redis:
+  host: localhost
+  port: 6379
+  password: ""
+  db: 1  # 使用不同的 Redis DB
+  pool_size: 5
+
+jwt:
+  secret: test-secret-key
+  expire_hour: 1
+
+log:
+  level: debug
+  format: console

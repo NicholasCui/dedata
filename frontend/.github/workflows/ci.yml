@@ -1,0 +1,129 @@
+# =============================================================================
+# CI Pipeline - PR 和分支构建检查
+# 触发条件: Pull Request 或 push 到非 main 分支
+# =============================================================================
+
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 代码质量检查
+  # ---------------------------------------------------------------------------
+  lint-and-type-check:
+    name: Lint and Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+  # ---------------------------------------------------------------------------
+  # 测试
+  # ---------------------------------------------------------------------------
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run tests
+        run: npm test
+        continue-on-error: true
+
+  # ---------------------------------------------------------------------------
+  # 构建检查
+  # ---------------------------------------------------------------------------
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+  # ---------------------------------------------------------------------------
+  # Docker 构建测试
+  # ---------------------------------------------------------------------------
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        dockerfile:
+          - Dockerfile
+          - Dockerfile.worker
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

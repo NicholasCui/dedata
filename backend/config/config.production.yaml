@@ -1,0 +1,59 @@
+server:
+  host: 0.0.0.0
+  port: 8080
+  env: production
+
+# 数据库配置 - 通过环境变量覆盖（DATABASE_HOST, DATABASE_PORT 等）
+database:
+  host: postgres  # Docker 容器名，或通过 DATABASE_HOST 环境变量覆盖
+  port: 5432
+  user: postgres  # 通过 DATABASE_USER 环境变量覆盖
+  password: ""    # 通过 DATABASE_PASSWORD 环境变量覆盖
+  dbname: dedata_prod  # 通过 DATABASE_DBNAME 环境变量覆盖
+  sslmode: disable
+  max_idle_conns: 20
+  max_open_conns: 200
+  conn_max_lifetime: 7200
+
+# Redis 配置 - 通过环境变量覆盖（REDIS_HOST, REDIS_PORT 等）
+redis:
+  host: redis  # Docker 容器名，或通过 REDIS_HOST 环境变量覆盖
+  port: 6379
+  password: ""  # 通过 REDIS_PASSWORD 环境变量覆盖
+  db: 0
+  pool_size: 20
+
+# JWT 配置 - 通过环境变量覆盖（JWT_SECRET）
+jwt:
+  secret: "change-this-in-production"  # 通过 JWT_SECRET 环境变量覆盖
+  expire_hour: 24
+
+# x402 Payment Service Configuration - 通过环境变量覆盖
+x402:
+  base_url: "http://66.154.126.168:8086"  # 通过 X402_BASE_URL 环境变量覆盖
+  api_token: ""  # 通过 X402_API_TOKEN 环境变量覆盖
+  merchant_id: ""  # 通过 X402_MERCHANT_ID 环境变量覆盖
+
+# CheckIn Configuration
+checkin:
+  price_amount: "0.01"
+  blockchain_type: 2
+  token_symbol: "USDT"
+  reward_amount: "10"
+  worker_interval: 30
+  max_retry_count: 5
+
+# Blockchain Configuration - 通过环境变量覆盖
+blockchain:
+  chain_id: 137
+  rpc_url: "https://polygon-rpc.com"  # 通过 BLOCKCHAIN_RPC_URL 环境变量覆盖
+  private_key: ""  # 通过 BLOCKCHAIN_PRIVATE_KEY 环境变量覆盖（必需）
+  token_address: ""  # 通过 BLOCKCHAIN_TOKEN_ADDRESS 环境变量覆盖（必需）
+  gas_limit: 100000
+  max_gas_price: 100
+  confirm_blocks: 12
+
+log:
+  level: info
+  format: json
+

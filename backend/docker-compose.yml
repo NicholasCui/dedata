@@ -1,0 +1,96 @@
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:14-alpine
+    container_name: dedata-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dedata-network
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: dedata-redis
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dedata-network
+
+  # DeData 后端应用
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dedata-app
+    restart: always
+    environment:
+      # 指定使用生产环境配置
+      - GO_ENV=production
+      # 数据库配置（Viper: database.* → DATABASE_*）
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=${DB_USER}
+      - DATABASE_PASSWORD=${DB_PASSWORD}
+      - DATABASE_DBNAME=${DB_NAME}
+      # Redis 配置（Viper: redis.* → REDIS_*）
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      # JWT 配置（Viper: jwt.* → JWT_*）
+      - JWT_SECRET=${JWT_SECRET}
+      # x402 配置（Viper: x402.* → X402_*）
+      - X402_BASE_URL=${X402_BASE_URL}
+      - X402_API_TOKEN=${X402_API_TOKEN}
+      - X402_MERCHANT_ID=${X402_MERCHANT_ID}
+      # 区块链配置（Viper: blockchain.* → BLOCKCHAIN_*）
+      - BLOCKCHAIN_RPC_URL=${BLOCKCHAIN_RPC_URL}
+      - BLOCKCHAIN_PRIVATE_KEY=${BLOCKCHAIN_PRIVATE_KEY}
+      - BLOCKCHAIN_TOKEN_ADDRESS=${BLOCKCHAIN_TOKEN_ADDRESS}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - dedata-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  dedata-network:
+    driver: bridge

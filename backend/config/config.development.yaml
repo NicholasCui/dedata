@@ -1,0 +1,57 @@
+server:
+  host: 0.0.0.0
+  port: 8080
+  env: development
+
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: "postgres"
+  dbname: dedata_dev
+  sslmode: disable
+  max_idle_conns: 10
+  max_open_conns: 100
+  conn_max_lifetime: 3600  # seconds
+
+redis:
+  host: localhost
+  port: 6379
+  password: ""
+  db: 0
+  pool_size: 10
+
+jwt:
+  secret: dev-secret-key-please-change-in-production
+  expire_hour: 24
+
+# x402 Payment Service Configuration
+x402:
+  base_url: "http://66.154.126.168:8086"              # x402 service URL
+  api_token: "my-plain-token-123"               # Get from x402 service
+  merchant_id: "1"           # Get from x402 service
+
+
+# CheckIn Configuration
+checkin:
+  price_amount: "1"           # Payment amount in USDT (1.0 USDT per checkin)
+  blockchain_type: 2            # 2 = Polygon (see x402 docs for other chains)
+  token_symbol: "USDT"          # Token symbol for payment
+  reward_amount: "10"           # Reward amount in DeData tokens (10 tokens per checkin)
+  worker_interval: 30           # Worker polling interval in seconds
+  max_retry_count: 3            # Maximum retry attempts for failed token transfers
+
+# Blockchain Configuration (for token distribution)
+blockchain:
+  chain_id: 137                                    # Polygon Mainnet
+  rpc_url: "https://polygon-rpc.com"  # More reliable RPC (or use your Alchemy/Infura key)
+  private_key: "118639d79a60e20e02cdde6eb71e3fb90c21a02e39d995055690bd93c33bdc99" # IMPORTANT: Keep this secret!
+  token_address: "0x0f17A994aa42a9E42584BAF0246B973D1C641FFd" # Your ERC20 token contract
+  gas_limit: 100000                                  # Fallback gas limit (auto-estimated from chain)
+  max_gas_price: 200                                 # Max gas price in Gwei (increased for faster confirmation)
+  confirm_blocks: 3                                  # Blocks to wait for confirmation
+
+log:
+  level: debug      # debug, info, warn, error
+  format: console   # console or json
+
