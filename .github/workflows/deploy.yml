@@ -204,7 +204,7 @@ jobs:
 
             # Stop and remove old containers
             echo "Stopping old containers..."
-            $DOCKER_COMPOSE down
+            $DOCKER_COMPOSE down --remove-orphans
 
             # Start services with new images
             echo "Starting services..."
