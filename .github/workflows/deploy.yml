@@ -127,34 +127,84 @@ jobs:
 
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
+          envs: GITHUB_TOKEN,GITHUB_REPOSITORY
           script: |
+            set -e  # Exit immediately if any command fails
+
             # Navigate to project directory
             cd ${{ secrets.DEPLOY_PATH || '/opt/dedata' }}
 
             # Create .env file from GitHub Secret
             echo "${{ secrets.DEPLOY_ENV }}" > .env
 
+            # Export GITHUB_REPOSITORY for docker-compose
+            export GITHUB_REPOSITORY="${GITHUB_REPOSITORY}"
+
             # Log in to GitHub Container Registry
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            if [ $? -ne 0 ]; then
+              echo "ERROR: Failed to login to GitHub Container Registry"
+              exit 1
+            fi
 
             # Pull latest images
+            echo "Pulling latest images..."
             docker-compose pull
+            if [ $? -ne 0 ]; then
+              echo "ERROR: Failed to pull Docker images"
+              exit 1
+            fi
 
             # Stop and remove old containers
+            echo "Stopping old containers..."
             docker-compose down
 
             # Start services with new images
+            echo "Starting services..."
             docker-compose up -d
+            if [ $? -ne 0 ]; then
+              echo "ERROR: Failed to start Docker containers"
+              exit 1
+            fi
+
+            # Wait for services to start
+            echo "Waiting for services to initialize..."
+            sleep 10
+
+            # Verify containers are running
+            RUNNING_CONTAINERS=$(docker-compose ps --services --filter "status=running" | wc -l)
+            TOTAL_SERVICES=$(docker-compose ps --services | wc -l)
+
+            if [ "$RUNNING_CONTAINERS" -lt "$TOTAL_SERVICES" ]; then
+              echo "ERROR: Not all containers are running"
+              echo "Expected: $TOTAL_SERVICES, Running: $RUNNING_CONTAINERS"
+              docker-compose ps
+              docker-compose logs --tail=50
+              exit 1
+            fi
+
+            # Verify specific services are running
+            for service in backend frontend postgres redis; do
+              if ! docker-compose ps $service | grep -q "Up"; then
+                echo "ERROR: Service '$service' is not running"
+                docker-compose logs --tail=50 $service
+                exit 1
+              fi
+            done
 
             # Clean up old images
             docker image prune -af
 
             # Show running containers
+            echo "Deployment successful! Running containers:"
             docker-compose ps
 
             echo "Deployment completed successfully!"

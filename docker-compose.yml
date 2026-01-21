@@ -42,7 +42,7 @@ services:
 
   # Backend API
   backend:
-    image: ghcr.io/${GITHUB_REPOSITORY:-yourusername/dedata}/backend:latest
+    image: ghcr.io/${GITHUB_REPOSITORY:-nicholascui/dedata}/backend:latest
     # Uncomment below for local development
     # build:
     #   context: ./backend
@@ -90,7 +90,7 @@ services:
 
   # Frontend
   frontend:
-    image: ghcr.io/${GITHUB_REPOSITORY:-yourusername/dedata}/frontend:latest
+    image: ghcr.io/${GITHUB_REPOSITORY:-nicholascui/dedata}/frontend:latest
     # Uncomment below for local development
     # build:
     #   context: ./frontend
