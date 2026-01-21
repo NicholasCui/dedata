@@ -172,8 +172,9 @@ jobs:
             # Create .env file from GitHub Secret
             echo "${{ secrets.DEPLOY_ENV }}" > .env
 
-            # Export GITHUB_REPOSITORY for docker-compose
-            export GITHUB_REPOSITORY="${GITHUB_REPOSITORY}"
+            # Export GITHUB_REPOSITORY for docker-compose (lowercase for Docker image naming)
+            export GITHUB_REPOSITORY="$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+            echo "Using GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
 
             # Log in to GitHub Container Registry
             echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
