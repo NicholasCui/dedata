@@ -130,17 +130,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
-          envs: GITHUB_TOKEN,GITHUB_REPOSITORY
+          envs: GITHUB_TOKEN,GITHUB_REPOSITORY,DEPLOY_PATH
           script: |
             set -e  # Exit immediately if any command fails
 
+            # Set default deploy path if not provided
+            DEPLOY_PATH="${DEPLOY_PATH:-/opt/dedata}"
+
             # Navigate to project directory
-            cd ${{ secrets.DEPLOY_PATH || '/opt/dedata' }}
+            cd "$DEPLOY_PATH"
+            echo "Deploying to: $DEPLOY_PATH"
+
+            # Verify docker-compose.yml exists
+            if [ ! -f "docker-compose.yml" ]; then
+              echo "ERROR: docker-compose.yml not found in $DEPLOY_PATH"
+              echo "Please ensure the repository is cloned to this directory"
+              exit 1
+            fi
 
             # Create .env file from GitHub Secret
             echo "${{ secrets.DEPLOY_ENV }}" > .env
