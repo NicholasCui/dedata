@@ -143,14 +143,29 @@ jobs:
             # Set default deploy path if not provided
             DEPLOY_PATH="${DEPLOY_PATH:-/opt/dedata}"
 
+            echo "Deploying to: $DEPLOY_PATH"
+
+            # Create deploy directory if it doesn't exist
+            mkdir -p "$DEPLOY_PATH"
+
             # Navigate to project directory
             cd "$DEPLOY_PATH"
-            echo "Deploying to: $DEPLOY_PATH"
+
+            # Clone or update repository
+            if [ ! -d ".git" ]; then
+              echo "Cloning repository for the first time..."
+              git clone https://github.com/${{ github.repository }}.git .
+            else
+              echo "Updating repository..."
+              git fetch origin
+              git reset --hard origin/${{ github.ref_name }}
+            fi
 
             # Verify docker-compose.yml exists
             if [ ! -f "docker-compose.yml" ]; then
               echo "ERROR: docker-compose.yml not found in $DEPLOY_PATH"
-              echo "Please ensure the repository is cloned to this directory"
+              echo "Repository structure:"
+              ls -la
               exit 1
             fi
 
