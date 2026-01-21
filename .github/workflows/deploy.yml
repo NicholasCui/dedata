@@ -209,9 +209,11 @@ jobs:
             # Start services with new images
             echo "Starting services..."
             $DOCKER_COMPOSE up -d
-            if [ $? -ne 0 ]; then
-              echo "ERROR: Failed to start Docker containers"
-              echo "Container logs:"
+            START_EXIT_CODE=$?
+
+            if [ $START_EXIT_CODE -ne 0 ]; then
+              echo "ERROR: Failed to start Docker containers (exit code: $START_EXIT_CODE)"
+              echo "=== All container logs ==="
               $DOCKER_COMPOSE logs --tail=100
               exit 1
             fi
@@ -220,16 +222,32 @@ jobs:
             echo "Waiting for services to initialize..."
             sleep 15
 
-            # Check if any container failed
-            FAILED_CONTAINERS=$($DOCKER_COMPOSE ps --filter "status=exited" --format "{{.Name}}")
-            if [ -n "$FAILED_CONTAINERS" ]; then
-              echo "ERROR: Some containers failed to start:"
-              echo "$FAILED_CONTAINERS"
+            # Show current container status
+            echo "=== Container Status ==="
+            $DOCKER_COMPOSE ps
+
+            # Check if any container failed or exited
+            FAILED_CONTAINERS=$($DOCKER_COMPOSE ps --format "{{.Name}}" --filter "status=exited" 2>/dev/null || true)
+            UNHEALTHY_CONTAINERS=$($DOCKER_COMPOSE ps --format "{{.Name}}" --filter "health=unhealthy" 2>/dev/null || true)
+
+            if [ -n "$FAILED_CONTAINERS" ] || [ -n "$UNHEALTHY_CONTAINERS" ]; then
+              echo "ERROR: Some containers have issues"
+
+              if [ -n "$FAILED_CONTAINERS" ]; then
+                echo "=== Failed/Exited containers: ==="
+                echo "$FAILED_CONTAINERS"
+              fi
+
+              if [ -n "$UNHEALTHY_CONTAINERS" ]; then
+                echo "=== Unhealthy containers: ==="
+                echo "$UNHEALTHY_CONTAINERS"
+              fi
+
               echo ""
-              echo "Logs for failed containers:"
-              for container in $FAILED_CONTAINERS; do
-                echo "=== Logs for $container ==="
-                docker logs --tail=100 $container
+              echo "=== Logs for all containers ==="
+              for service in backend frontend postgres redis; do
+                echo "=== Logs for $service ==="
+                $DOCKER_COMPOSE logs --tail=50 $service
                 echo ""
               done
               exit 1

@@ -63,12 +63,12 @@ services:
       LOG_FORMAT: ${LOG_FORMAT:-json}
 
       # Database
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: ${DB_USER:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-postgres}
-      DB_NAME: ${DB_NAME:-dedata}
-      DB_SSLMODE: disable
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${DB_USER:-postgres}
+      DATABASE_PASSWORD: ${DB_PASSWORD:-postgres}
+      DATABASE_DBNAME: ${DB_NAME:-dedata}
+      DATABASE_SSLMODE: disable
 
       # Redis
       REDIS_HOST: redis
@@ -88,11 +88,11 @@ services:
       # Blockchain
       BLOCKCHAIN_PRIVATE_KEY: ${BLOCKCHAIN_PRIVATE_KEY:-}
       BLOCKCHAIN_RPC_URL: ${BLOCKCHAIN_RPC_URL:-}
-      BLOCKCHAIN_CONTRACT_ADDRESS: ${BLOCKCHAIN_CONTRACT_ADDRESS:-}
+      BLOCKCHAIN_TOKEN_ADDRESS: ${BLOCKCHAIN_CONTRACT_ADDRESS:-}
 
       # CheckIn
       CHECKIN_REWARD_AMOUNT: ${CHECKIN_REWARD_AMOUNT:-10}
-      CHECKIN_PROCESS_INTERVAL: ${CHECKIN_PROCESS_INTERVAL:-60}
+      CHECKIN_WORKER_INTERVAL: ${CHECKIN_PROCESS_INTERVAL:-60}
     ports:
       - "8081:8080"
     depends_on:
