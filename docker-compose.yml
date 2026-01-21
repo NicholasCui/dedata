@@ -50,10 +50,17 @@ services:
     container_name: dedata-backend
     restart: unless-stopped
     environment:
+      # Environment
+      GO_ENV: production
+      ENV: ${ENV:-production}
+
       # Server
       SERVER_HOST: 0.0.0.0
       SERVER_PORT: 8080
-      ENV: ${ENV:-production}
+
+      # Log
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
 
       # Database
       DB_HOST: postgres
@@ -72,6 +79,20 @@ services:
       # JWT
       JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
       JWT_EXPIRE_HOUR: 24
+
+      # X402 (Payment Gateway)
+      X402_BASE_URL: ${X402_BASE_URL:-https://api.x402.com}
+      X402_API_TOKEN: ${X402_API_TOKEN:-}
+      X402_MERCHANT_ID: ${X402_MERCHANT_ID:-}
+
+      # Blockchain
+      BLOCKCHAIN_PRIVATE_KEY: ${BLOCKCHAIN_PRIVATE_KEY:-}
+      BLOCKCHAIN_RPC_URL: ${BLOCKCHAIN_RPC_URL:-}
+      BLOCKCHAIN_CONTRACT_ADDRESS: ${BLOCKCHAIN_CONTRACT_ADDRESS:-}
+
+      # CheckIn
+      CHECKIN_REWARD_AMOUNT: ${CHECKIN_REWARD_AMOUNT:-10}
+      CHECKIN_PROCESS_INTERVAL: ${CHECKIN_PROCESS_INTERVAL:-60}
     ports:
       - "8081:8080"
     depends_on:
