@@ -8,4 +8,5 @@ import (
 // RegisterHealthRoutes 注册健康检查路由
 func RegisterHealthRoutes(r *gin.RouterGroup, healthHandler *handler.HealthHandler) {
 	r.GET("/health", healthHandler.Check)
+	r.HEAD("/health", healthHandler.Check)
 }
