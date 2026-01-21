@@ -182,9 +182,20 @@ jobs:
               exit 1
             fi
 
+            # Determine docker compose command (docker compose vs docker-compose)
+            if command -v docker-compose &> /dev/null; then
+              DOCKER_COMPOSE="docker-compose"
+            elif docker compose version &> /dev/null; then
+              DOCKER_COMPOSE="docker compose"
+            else
+              echo "ERROR: Neither 'docker-compose' nor 'docker compose' is available"
+              exit 1
+            fi
+            echo "Using: $DOCKER_COMPOSE"
+
             # Pull latest images
             echo "Pulling latest images..."
-            docker-compose pull
+            $DOCKER_COMPOSE pull
             if [ $? -ne 0 ]; then
               echo "ERROR: Failed to pull Docker images"
               exit 1
@@ -192,11 +203,11 @@ jobs:
 
             # Stop and remove old containers
             echo "Stopping old containers..."
-            docker-compose down
+            $DOCKER_COMPOSE down
 
             # Start services with new images
             echo "Starting services..."
-            docker-compose up -d
+            $DOCKER_COMPOSE up -d
             if [ $? -ne 0 ]; then
               echo "ERROR: Failed to start Docker containers"
               exit 1
@@ -207,22 +218,22 @@ jobs:
             sleep 10
 
             # Verify containers are running
-            RUNNING_CONTAINERS=$(docker-compose ps --services --filter "status=running" | wc -l)
-            TOTAL_SERVICES=$(docker-compose ps --services | wc -l)
+            RUNNING_CONTAINERS=$($DOCKER_COMPOSE ps --services --filter "status=running" | wc -l)
+            TOTAL_SERVICES=$($DOCKER_COMPOSE ps --services | wc -l)
 
             if [ "$RUNNING_CONTAINERS" -lt "$TOTAL_SERVICES" ]; then
               echo "ERROR: Not all containers are running"
               echo "Expected: $TOTAL_SERVICES, Running: $RUNNING_CONTAINERS"
-              docker-compose ps
-              docker-compose logs --tail=50
+              $DOCKER_COMPOSE ps
+              $DOCKER_COMPOSE logs --tail=50
               exit 1
             fi
 
             # Verify specific services are running
             for service in backend frontend postgres redis; do
-              if ! docker-compose ps $service | grep -q "Up"; then
+              if ! $DOCKER_COMPOSE ps $service | grep -q "Up"; then
                 echo "ERROR: Service '$service' is not running"
-                docker-compose logs --tail=50 $service
+                $DOCKER_COMPOSE logs --tail=50 $service
                 exit 1
               fi
             done
@@ -232,6 +243,6 @@ jobs:
 
             # Show running containers
             echo "Deployment successful! Running containers:"
-            docker-compose ps
+            $DOCKER_COMPOSE ps
 
             echo "Deployment completed successfully!"
