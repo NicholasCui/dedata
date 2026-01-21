@@ -211,12 +211,29 @@ jobs:
             $DOCKER_COMPOSE up -d
             if [ $? -ne 0 ]; then
               echo "ERROR: Failed to start Docker containers"
+              echo "Container logs:"
+              $DOCKER_COMPOSE logs --tail=100
               exit 1
             fi
 
             # Wait for services to start
             echo "Waiting for services to initialize..."
-            sleep 10
+            sleep 15
+
+            # Check if any container failed
+            FAILED_CONTAINERS=$($DOCKER_COMPOSE ps --filter "status=exited" --format "{{.Name}}")
+            if [ -n "$FAILED_CONTAINERS" ]; then
+              echo "ERROR: Some containers failed to start:"
+              echo "$FAILED_CONTAINERS"
+              echo ""
+              echo "Logs for failed containers:"
+              for container in $FAILED_CONTAINERS; do
+                echo "=== Logs for $container ==="
+                docker logs --tail=100 $container
+                echo ""
+              done
+              exit 1
+            fi
 
             # Verify containers are running
             RUNNING_CONTAINERS=$($DOCKER_COMPOSE ps --services --filter "status=running" | wc -l)
