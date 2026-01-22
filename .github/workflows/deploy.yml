@@ -97,12 +97,8 @@ jobs:
       - name: Create .env.production file
         run: |
           cat > ./frontend/.env.production << EOF
-          # This is a placeholder .env.production for Docker build
-          # Real environment variables will be injected at runtime
-          DATABASE_URL=placeholder
-          REDIS_URL=placeholder
-          SESSION_SECRET=placeholder
-          NEXT_PUBLIC_API_URL=placeholder
+          # API URL for frontend (replace with your server IP/domain)
+          NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:8081' }}
           EOF
 
       - name: Build and push frontend Docker image
@@ -114,6 +110,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:8081' }}
 
   # Deploy to production server
   deploy:
